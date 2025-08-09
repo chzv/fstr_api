@@ -2,37 +2,56 @@
 
 REST API для приёма, редактирования и получения данных о перевалах ФСТР.
 
-## Что реализовано
-- PostgreSQL-схема: тип статуса модерации `new | pending | accepted | rejected`, таблицы `users`, `coords`, `levels`, `pereval`, `images`, индексы по FK, триггер `updated_at`.
-- `POST /submitData` — добавление объекта (включая фото в base64).
-- `GET /submitData/{id}` — получение объекта со статусом модерации.
-- `PATCH /submitData/{id}` — редактирование **только при `status=new`**; запрещено менять ФИО, email и телефон.
-- `GET /submitData/?user__email=<email>` — список всех объектов пользователя со статусами.
-- Подключение к БД через переменные окружения `FSTR_DB_*`.
+## Возможности
+- **База данных PostgreSQL**:
+  - Тип статуса модерации: `new | pending | accepted | rejected`.
+  - Таблицы: `users`, `coords`, `levels`, `pereval`, `images`.
+  - Индексы по FK и триггер `updated_at`.
+- **Эндпоинты**:
+  - `POST /submitData` — добавление объекта (включая фото в Base64).
+  - `GET /submitData/{id}` — получение объекта со статусом модерации.
+  - `PATCH /submitData/{id}` — редактирование **только при `status=new`**; запрещено менять ФИО, email и телефон.
+  - `GET /submitData/?user__email=<email>` — список всех объектов пользователя со статусами.
+- **Конфигурация**:
+  - Подключение к БД через переменные окружения `FSTR_DB_*` или `DATABASE_URL`.
 - Swagger UI: `/docs`.
 
-## Схема БД
-Файл `00_schema.sql` создаёт тип `moderation_status`, таблицы `users`, `coords`, `levels`, `pereval`, `images`, индексы и триггер `updated_at`.
+---
 
-### Быстрый старт БД (локально без Docker)
+## Схема БД
+Файл [`00_schema.sql`](./00_schema.sql) создаёт тип `moderation_status`, все таблицы, индексы и триггер `updated_at`.
+
+---
+
+## Запуск локально
+
+### 1. Создать и заполнить БД
 ```bash
 createdb fstr
 psql -d fstr -f 00_schema.sql
-Установка и запуск (локально)
+
+2. Установить зависимости
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .\.venv\Scripts\activate
 pip install -r requirements.txt
 
-# Переменные окружения (пример)
+3. Переменные окружения (пример)
 export FSTR_DB_HOST=localhost
 export FSTR_DB_PORT=5432
-export FSTR_DB_LOGIN=kira
-export FSTR_DB_PASS=passwd123
+export FSTR_LOGIN=kira
+export FSTR_PASS=passwd123
 export FSTR_DB_NAME=fstr
 
+4. Запустить приложение
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-Примеры вызовов
+Документация API
+
+Swagger UI:
+Локально: http://localhost:8000/docs
+Render: https://fstr-api.onrender.com/docs
+
+Примеры запросов
 
 POST /submitData
 curl -X POST http://localhost:8000/submitData \
@@ -43,14 +62,20 @@ curl -X POST http://localhost:8000/submitData \
   "other_titles": "Триев",
   "connect": "",
   "add_time": "2021-09-22 13:18:13",
-  "user": {"email": "qwerty@mail.ru", "fam": "Пупкин", "name": "Василий", "otc": "Иванович", "phone": "+7 555 55 55"},
+  "user": {
+    "email": "qwerty@mail.ru",
+    "fam": "Пупкин",
+    "name": "Василий",
+    "otc": "Иванович",
+    "phone": "+7 555 55 55"
+  },
   "coords": {"latitude": "45.3842", "longitude": "7.1525", "height": "1200"},
   "level": {"winter": "", "summer": "1А", "autumn": "1А", "spring": ""},
   "images": [
-    {"data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/ek9nYQAAAAASUVORK5CYII=","title":"Седловина"},
-    {"data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/ek9nYQAAAAASUVORK5CYII=","title":"Подъём"}
+    {"data":"<base64>","title":"Седловина"},
+    {"data":"<base64>","title":"Подъём"}
   ]
-}'
+ }'
 
 Успех:
 {"status":200,"message":null,"id":1}
@@ -59,7 +84,6 @@ GET /submitData/{id}
 curl http://localhost:8000/submitData/1
 
 PATCH /submitData/{id}
-(разрешено только при status=new; ФИО/email/телефон должны совпадать с сохранёнными)
 curl -X PATCH http://localhost:8000/submitData/1 \
  -H "Content-Type: application/json" \
  -d '{
@@ -68,37 +92,36 @@ curl -X PATCH http://localhost:8000/submitData/1 \
   "other_titles": "Триев",
   "connect": "связь",
   "add_time": "2021-09-22 13:18:13",
-  "user": {"email":"qwerty@mail.ru","fam":"Пупкин","name":"Василий","otc":"Иванович","phone":"+7 555 55 55"},
+  "user": {
+    "email":"qwerty@mail.ru",
+    "fam":"Пупкин",
+    "name":"Василий",
+    "otc":"Иванович",
+    "phone":"+7 555 55 55"
+  },
   "coords": {"latitude":"45.38","longitude":"7.15","height":"1300"},
   "level": {"winter":"","summer":"1А","autumn":"1А","spring":""},
-  "images": [{"data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMB/ek9nYQAAAAASUVORK5CYII=","title":"Новая"}]
+  "images": [{"data":"<base64>","title":"Новая"}]
  }'
-
-Ответ:
-{"state":1,"message":null}
+Разрешено только при status=new; ФИО/email/телефон должны совпадать с сохранёнными.
 
 GET /submitData/?user__email=<email>
 curl "http://localhost:8000/submitData/?user__email=qwerty@mail.ru"
 
-Swagger / OpenAPI
-
-После запуска:
-http://localhost:8000/docs
-
 Тесты
 # в одном окне — сервер
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --reload
 # в другом — тесты
 pytest -q
 
 Запуск в Docker
 docker compose up -d --build
 # API: http://localhost:8000
-# БД с хоста: psql -h localhost -p 5433 -U <user> -d <db>
-Переменные окружения (Docker)
+# Подключение к БД с хоста:
+psql -h localhost -p 5433 -U <user> -d <db>
 
-Создайте .env рядом с docker-compose.yml (или используйте .env.example):
-
+Переменные окружения для Docker
+.env (или .env.example):
 POSTGRES_USER=fstr_user
 POSTGRES_PASSWORD=Strong_Pass_123
 POSTGRES_DB=fstr
