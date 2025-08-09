@@ -7,3 +7,4 @@ SQLAlchemy==2.0.32
 uvicorn==0.30.6
 email-validator
 
+
