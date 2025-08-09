@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, constr, validator
 from typing import List, Optional
 from datetime import datetime
 
+# ====== ВХОД submitData / PATCH ======
 class UserIn(BaseModel):
     email: EmailStr
     fam: constr(strip_whitespace=True, min_length=1)
@@ -64,3 +65,42 @@ class SubmitDataOut(BaseModel):
     status: int
     message: Optional[str] = None
     id: Optional[int] = None
+
+# ====== ВЫХОД для GET ======
+class UserOut(BaseModel):
+    email: EmailStr
+    full_name: str
+    phone: str
+
+class CoordsOut(BaseModel):
+    latitude: float
+    longitude: float
+    height: int
+
+class LevelOut(BaseModel):
+    winter: str
+    summer: str
+    autumn: str
+    spring: str
+
+class ImageOut(BaseModel):
+    title: str
+    data: str  # base64
+
+class PerevalOut(BaseModel):
+    id: int
+    status: str
+    beauty_title: str
+    title: str
+    other_titles: str
+    connect: str
+    add_time: str
+    user: UserOut
+    coords: CoordsOut
+    level: LevelOut
+    images: List[ImageOut]
+
+# ====== ВЫХОД для PATCH ======
+class PatchOut(BaseModel):
+    state: int
+    message: Optional[str] = None

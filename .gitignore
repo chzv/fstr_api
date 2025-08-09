@@ -1,7 +1,3 @@
-
----
-
-```gitignore
 # Python
 __pycache__/
 *.py[cod]
@@ -9,8 +5,8 @@ __pycache__/
 *.pyd
 *.so
 *.egg-info/
-.build/
 dist/
+build/
 pip-wheel-metadata/
 
 # Venv
@@ -23,7 +19,7 @@ venv/
 .idea/
 .DS_Store
 
-# Tests / caches
+# Tests / coverage
 .pytest_cache/
 .coverage
 htmlcov/
@@ -33,5 +29,5 @@ htmlcov/
 .env.*
 !.env.example
 
-# Alembic (если добавишь миграции позже)
+# Alembic (если добавишь позже)
 alembic/versions/*.pyc
